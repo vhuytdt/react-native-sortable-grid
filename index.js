@@ -69,6 +69,7 @@ class SortableGrid extends Component {
         )}
     </Animated.View>
 
+
   constructor() {
     super()
 
@@ -422,7 +423,7 @@ class SortableGrid extends Component {
   }
 
   _animateGridHeight = () => {
-    this.gridHeightTarget = this.rows * this.state.blockWidth
+    this.gridHeightTarget = this.rows * this.props.rowHeight
     if (this.gridHeightTarget === this.state.gridLayout.height || this.state.gridLayout.height === 0)
       this.state.gridHeight.setValue(this.gridHeightTarget)
     else if (this.state.gridHeight._value !== this.gridHeightTarget) {
