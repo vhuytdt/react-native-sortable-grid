@@ -20,8 +20,8 @@ const NULL_FN = () => { }
 
 class Block extends Component {
 
-  render = () =>
-    <Animated.View
+  render = () => {
+    return <Animated.View
       style={this.props.style}
       onLayout={this.props.onLayout}
       {...this.props.panHandlers}
@@ -29,8 +29,12 @@ class Block extends Component {
       <TouchableWithoutFeedback
         style={{ flex: 1 }}
         delayLongPress={this.props.delayLongPress}
-        onLongPress={this.props.onLongPress}
-        onPress={this.props.onPress}>
+        onLongPress={() =>
+          this.props.inactive || this.props.fixed || this.props.onLongPress()
+        }
+        onPress={() => this.props.inactive || this.props.onPress()}
+
+      >
 
         <View style={styles.itemImageContainer}>
           <View style={this.props.itemWrapperStyle}>
@@ -41,6 +45,7 @@ class Block extends Component {
 
       </TouchableWithoutFeedback>
     </Animated.View>
+  }
 
 }
 
@@ -63,6 +68,8 @@ class SortableGrid extends Component {
             onPress={this.handleTap(item.props)}
             itemWrapperStyle={this._getItemWrapperStyle(key)}
             deletionView={this._getDeletionView(key)}
+            inactive={item.props.inactive}
+            fixed={item.props.fixed}
           >
             {item}
           </Block>
@@ -72,6 +79,11 @@ class SortableGrid extends Component {
 
   constructor() {
     super()
+
+    this.initData();
+  }
+
+  initData = () => {
 
     this.blockTransitionDuration = BLOCK_TRANSITION_DURATION
     this.activeBlockCenteringDuration = ACTIVE_BLOCK_CENTERING_DURATION
@@ -258,7 +270,7 @@ class SortableGrid extends Component {
   }
 
   afterDragRelease = () => {
-    let itemOrder = _.sortBy(this.itemOrder, item => item.order)
+    let itemOrder = _.sortBy(this.itemOrder, item => item)
     this.onDragRelease({ itemOrder })
     this.setState({ activeBlock: null })
     this.panCapture = false
@@ -359,9 +371,10 @@ class SortableGrid extends Component {
   _blockPositionsSet = () => this.state.blockPositionsSetCount === this.items.length
 
   _saveItemOrder = (items) => {
+    if (!items) return;
     items.forEach((item, index) => {
       if (!_.findKey(this.itemOrder, (oldItem) => oldItem.key === item.key)) {
-        this.itemOrder.push({ key: item.key, ref: item.ref, order: this.items.length })
+        this.itemOrder.push({ key: item.key, ref: item.ref, order: this.items.length, })
         if (!this.initialLayoutDone) {
           this.items.push(item)
         }
